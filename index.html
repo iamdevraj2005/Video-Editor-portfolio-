@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Devraj | Video Editor</title>
+    <style>
+      /* CSS Reset */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Poppins", sans-serif;
+      }
+
+      /* Theme Variables - Dark Mode Only */
+      :root {
+        --background: #121212;
+        --text: #e0e0e0;
+        --primary: #ff7b59;
+        --secondary: #34495e;
+        --accent: #4fa8eb;
+        --card-bg: #1e1e1e;
+        --header-bg: rgba(18, 18, 18, 0.95);
+        --shadow: rgba(0, 0, 0, 0.3);
+        --transition: all 0.3s ease;
+      }
+
+      /* Typography */
+      body {
+        background-color: var(--background);
+        color: var(--text);
+        transition: var(--transition);
+        overflow-x: hidden;
+        position: relative;
+      }
+
+      a {
+        text-decoration: none;
+        color: inherit;
+      }
+
+      /* Layout */
+      section {
+        padding: 80px 10%;
+        min-height: 60vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        z-index: 1;
+      }
+
+      .section-container {
+        width: 100%;
+        display: flex;
+        gap: 40px;
+        align-items: center;
+        margin-top: 30px;
+      }
+
+      @media (max-width: 900px) {
+        .section-container {
+          flex-direction: column;
+        }
+      }
+
+      /* Video Edit Background Animation */
+      .video-editing-bg {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 0;
+        opacity: 0.07;
+        overflow: hidden;
+      }
+
+      .timeline-element {
+        position: absolute;
+        height: 3px;
+        background: var(--primary);
+        opacity: 0.6;
+        border-radius: 2px;
+        transform: translateX(-100%);
+        animation: slideRight 15s linear infinite;
+      }
+
+      .clip-element {
+        position: absolute;
+        width: 80px;
+        height: 40px;
+        border: 2px solid var(--primary);
+        border-radius: 5px;
+        opacity: 0.4;
+        transform: translateY(100vh) rotate(0deg);
+        animation: floatUp 20s linear infinite;
+      }
+
+      .effect-element {
+        position: absolute;
+        width: 30px;
+        height: 30px;
+        background-color: var(--accent);
+        opacity: 0.3;
+        border-radius: 50%;
+        transform: translate(-50px, -50px) scale(0);
+        animation: pulseEffect 12s ease-in-out infinite;
+      }
+
+      .waveform {
+        position: absolute;
+        height: 20px;
+        background: repeating-linear-gradient(
+          to right,
+          var(--primary),
+          var(--primary) 2px,
+          transparent 2px,
+          transparent 5px
+        );
+        opacity: 0.2;
+        transform: translateX(100vw);
+        animation: slideLeft 25s linear infinite;
+      }
+
+      @keyframes slideRight {
+        0% {
+          transform: translateX(-100%);
+        }
+        100% {
+          transform: translateX(100vw);
+        }
+      }
+
+      @keyframes slideLeft {
+        0% {
+          transform: translateX(100vw);
+        }
+        100% {
+          transform: translateX(-100%);
+        }
+      }
+
+      @keyframes floatUp {
+        0% {
+          transform: translateY(100vh) rotate(0deg);
+          opacity: 0.4;
+        }
+        80% {
+          opacity: 0.2;
+        }
+        100% {
+          transform: translateY(-100px) rotate(10deg);
+          opacity: 0;
+        }
+      }
+
+      @keyframes pulseEffect {
+        0% {
+          transform: translate(120%, 120%) scale(0);
+          opacity: 0;
+        }
+        50% {
+          transform: translate(50%, 50%) scale(1);
+          opacity: 0.3;
+        }
+        100% {
+          transform: translate(-20%, -20%) scale(0);
+          opacity: 0;
+        }
+      }
+
+      /* Header/Navigation */
+      #desktop-nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px 10%;
+        background-color: var(--header-bg);
+        box-shadow: 0 2px 10px var(--shadow);
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 1000;
+        backdrop-filter: blur(10px);
+        transition: var(--transition);
+      }
+
+      .logo {
+        font-size: 24px;
+        font-weight: 700;
+        color: var(--primary);
+        position: relative;
+      }
+
+      .logo::after {
+        content: "";
+        position: absolute;
+        bottom: -5px;
+        left: 0;
+        width: 50%;
+        height: 3px;
+        background-color: var(--primary);
+        transition: var(--transition);
+      }
+
+      .nav-links {
+        display: flex;
+        gap: 30px;
+        list-style: none;
+      }
+
+      .nav-links li a {
+        font-weight: 500;
+        position: relative;
+        transition: var(--transition);
+      }
+
+      .nav-links li a::after {
+        content: "";
+        position: absolute;
+        bottom: -5px;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background-color: var(--primary);
+        transition: var(--transition);
+      }
+
+      .nav-links li a:hover::after {
+        width: 100%;
+      }
+
+      /* Hero Section */
+      #profile {
+        padding-top: 150px;
+        position: relative;
+        overflow: hidden;
+      }
+
+      #profile::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(
+          circle at top right,
+          var(--primary),
+          transparent 60%
+        );
+        opacity: 0.1;
+        z-index: -1;
+      }
+
+      .section__pic-container {
+        width: 300px;
+        height: 300px;
+        border-radius: 50%;
+        overflow: hidden;
+        border: 3px solid var(--primary);
+        box-shadow: 0 10px 30px var(--shadow);
+        position: relative;
+        transition: var(--transition);
+      }
+
+      .section__pic-container:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 30px var(--shadow);
+      }
+
+      .section__pic-container img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .section__text {
+        text-align: center;
+        margin-top: 40px;
+      }
+
+      .section__text__p1 {
+        font-size: 18px;
+        color: var(--primary);
+        letter-spacing: 1px;
+        margin-bottom: 10px;
+      }
+
+      .title {
+        font-size: 40px;
+        margin-bottom: 15px;
+        color: var(--text);
+        position: relative;
+        padding-bottom: 15px;
+      }
+
+      .title::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 80px;
+        height: 4px;
+        background: var(--primary);
+      }
+
+      .section__text__p2 {
+        font-size: 20px;
+        margin-bottom: 30px;
+        color: var(--secondary);
+      }
+
+      /* Buttons */
+      .btn-container {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        margin-bottom: 30px;
+      }
+
+      .btn {
+        padding: 12px 28px;
+        border-radius: 30px;
+        font-weight: 600;
+        border: 2px solid var(--primary);
+        cursor: pointer;
+        transition: var(--transition);
+        font-size: 16px;
+      }
+
+      .btn-color-1 {
+        background-color: var(--primary);
+        color: white;
+      }
+
+      .btn-color-1:hover {
+        background-color: transparent;
+        color: var(--primary);
+      }
+
+      .btn-color-2 {
+        background-color: transparent;
+        color: var(--primary);
+      }
+
+      .btn-color-2:hover {
+        background-color: var(--primary);
+        color: white;
+      }
+
+      /* Social Icons */
+      #socials-container {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+      }
+
+      .icon {
+        width: 32px;
+        height: 32px;
+        cursor: pointer;
+        transition: var(--transition);
+        filter: grayscale(80%);
+      }
+
+      .icon:hover {
+        transform: scale(1.2);
+        filter: grayscale(0%);
+      }
+
+      /* About Section */
+      #about {
+        background-color: var(--card-bg);
+        position: relative;
+      }
+
+      #about::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 100px;
+        background: linear-gradient(to bottom, var(--background), transparent);
+        z-index: 2;
+      }
+
+      .about-pic {
+        border-radius: 20px;
+        box-shadow: 0 10px 30px var(--shadow);
+        transition: var(--transition);
+      }
+
+      .about-details-container {
+        max-width: 600px;
+      }
+
+      .about-details-container p {
+        line-height: 1.8;
+        font-size: 17px;
+        text-align: justify;
+      }
+
+      /* Skills Section */
+      .experience-details-container {
+        width: 100%;
+        margin-top: 30px;
+      }
+
+      .about-containers {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 30px;
+        width: 100%;
+      }
+
+      .details-container {
+        background-color: var(--card-bg);
+        border-radius: 15px;
+        padding: 30px;
+        box-shadow: 0 5px 15px var(--shadow);
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+        z-index: 1;
+      }
+
+      .details-container::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 5px;
+        height: 100%;
+        background-color: var(--primary);
+        transition: var(--transition);
+        z-index: -1;
+      }
+
+      .details-container:hover::before {
+        width: 100%;
+        opacity: 0.1;
+      }
+
+      .details-container:hover {
+        transform: translateY(-10px);
+      }
+
+      .details-container h2 {
+        margin-bottom: 20px;
+        color: var(--primary);
+        font-size: 24px;
+      }
+
+      .details-container ul {
+        list-style-position: inside;
+        margin-left: 15px;
+      }
+
+      .details-container li {
+        margin-bottom: 10px;
+      }
+
+      /* Showvideos Section */
+      .color-container {
+        border-color: var(--primary);
+      }
+
+      .project-video {
+        width: 100%;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        box-shadow: 0 5px 15px var(--shadow);
+      }
+
+      /* Video placeholder with play icon */
+      .video-placeholder {
+        width: 100%;
+        height: 200px;
+        background-color: rgba(255, 255, 255, 0.05);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 20px;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .video-placeholder::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(45deg, var(--primary) 0%, transparent 100%);
+        opacity: 0.2;
+      }
+
+      .video-placeholder .play-icon {
+        font-size: 50px;
+        color: var(--primary);
+        background-color: rgba(18, 18, 18, 0.7);
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: var(--transition);
+        z-index: 2;
+      }
+
+      .video-placeholder .play-icon:hover {
+        transform: scale(1.1);
+        background-color: var(--primary);
+        color: white;
+      }
+
+      /* Contact Section */
+      #contact {
+        position: relative;
+        background-color: var(--card-bg);
+      }
+
+      .contact-info-upper-container {
+        display: flex;
+        justify-content: center;
+        gap: 30px;
+        flex-wrap: wrap;
+        margin-top: 30px;
+      }
+
+      .contact-info-container {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background-color: var(--background);
+        padding: 15px 25px;
+        border-radius: 30px;
+        box-shadow: 0 5px 15px var(--shadow);
+        transition: var(--transition);
+      }
+
+      .contact-info-container:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px var(--shadow);
+      }
+
+      .contact-info-container p a {
+        color: var(--primary);
+        font-weight: 500;
+      }
+
+      /* Footer */
+      footer {
+        background-color: var(--secondary);
+        color: white;
+        padding: 40px 10%;
+        text-align: center;
+      }
+
+      footer nav {
+        margin-bottom: 20px;
+      }
+
+      footer .nav-links {
+        justify-content: center;
+        margin-bottom: 20px;
+      }
+
+      footer .nav-links li a {
+        color: #ddd;
+      }
+
+      footer .nav-links li a:hover {
+        color: var(--primary);
+      }
+
+      footer p {
+        font-size: 14px;
+        opacity: 0.8;
+      }
+
+      /* Animations */
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      section {
+        animation: fadeIn 1s ease-out;
+      }
+
+      /* Scroll Animation */
+      .scroll-indicator {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background-color: var(--primary);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        box-shadow: 0 5px 15px var(--shadow);
+        opacity: 0;
+        transition: var(--transition);
+        z-index: 999;
+      }
+
+      .scroll-indicator.visible {
+        opacity: 1;
+      }
+
+      .scroll-indicator:hover {
+        transform: scale(1.1);
+      }
+
+      /* Responsive */
+      @media (max-width: 768px) {
+        #desktop-nav {
+          padding: 15px 5%;
+        }
+
+        section {
+          padding: 60px 5%;
+        }
+
+        .title {
+          font-size: 32px;
+        }
+
+        .section__pic-container {
+          width: 200px;
+          height: 200px;
+        }
+
+        .btn-container {
+          flex-direction: column;
+          align-items: center;
+        }
+
+        .btn {
+          width: 200px;
+        }
+
+        .about-containers {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <!-- Video Editing Background Animation -->
+    <div class="video-editing-bg" id="video-editing-bg"></div>
+
+    <nav id="desktop-nav">
+      <div class="logo">Devraj Lawaniya</div>
+      <div style="display: flex; align-items: center">
+        <ul class="nav-links">
+          <li><a href="#about">About</a></li>
+          <li><a href="#skills">Skills</a></li>
+          <li><a href="#showvideos">Show videos</a></li>
+          <li><a href="#contact">Contact</a></li>
+        </ul>
+      </div>
+    </nav>
+
+    <section id="profile">
+      <div class="section__pic-container">
+        <img
+          src="https://i.postimg.cc/D0L3KBYq/Untitled-design-1.png"
+          alt="Devraj profile picture"
+        />
+      </div>
+      <div class="section__text">
+        <p class="section__text__p1">Hello, I'm</p>
+        <h1 class="title">Devraj Lawaniya</h1>
+        <p class="section__text__p2">Video Editor & Graphic Designer</p>
+        <div class="btn-container">
+          <button class="btn btn-color-2" onclick="window.open('https://olive-annamarie-16.tiiny.site')">
+            <i class="fas fa-download"></i> Download CV
+          </button>
+          <button class="btn btn-color-1" onclick="location.href='#contact'">
+            <i class="fas fa-envelope"></i> Contact Me
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <section id="about">
+      <p class="section__text__p1">Get to Know Me</p>
+      <h1 class="title">About Me</h1>
+      <div class="section-container">
+        <div class="section__pic-container">
+          <img
+            src="https://i.postimg.cc/D0L3KBYq/Untitled-design-1.png"
+            alt="Profile"
+            class="about-pic"
+          />
+        </div>
+        <div class="about-details-container">
+          <p>
+            I'm a passionate Video Editor with experience in crafting compelling
+            visual stories using Adobe Premiere Pro, After Effects, and DaVinci
+            Resolve. From cinematic cuts to snappy social media edits, I turn
+            raw footage into polished productions. Whether it's YouTube content,
+            client reels, music videos, or event highlights—I'm all about
+            bringing ideas to life through video.
+          </p>
+          <br />
+          <p>
+            With an eye for detail and a knack for rhythm, I ensure every
+            project maintains the right pace and emotional impact. My background
+            in visual storytelling helps me create compelling narratives that
+            resonate with audiences across platforms.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section id="skills">
+      <p class="section__text__p1">Explore My</p>
+      <h1 class="title">Video Editing Skills</h1>
+      <div class="experience-details-container">
+        <div class="about-containers">
+          <div class="details-container">
+            <h2><i class="fas fa-edit"></i> Editing Tools</h2>
+            <ul>
+              <li>Adobe Premiere Pro</li>
+              <li>Mobile Editings Apps</li>
+              <li>DaVinci Resolve</li>
+              <li>Photoshop</li>
+              <li>Canvas</li>
+            </ul>
+          </div>
+          <div class="details-container">
+            <h2><i class="fas fa-film"></i> Specializations</h2>
+            <ul>
+              <li>Montage Creation</li>
+              <li>Color Grading</li>
+              <li>Motion Graphics</li>
+              <li>Sound Sync & Effects</li>
+              <li>Visual Effects</li>
+            </ul>
+          </div>
+          <div class="details-container">
+            <h2><i class="fas fa-tasks"></i> Project Types</h2>
+            <ul>
+              <li>Social Media Content</li>
+              <li>Music Videos</li>
+              <li>Corporate Videos</li>
+              <li>Travel Vlogs</li>
+              <li>Short Films</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Fixed ID to match navigation link -->
+    <section id="showvideos">
+      <p class="section__text__p1">Watch My</p>
+      <h1 class="title">Show videos</h1>
+      <div class="experience-details-container">
+        <div class="about-containers">
+          <div class="details-container color-container">
+            <h2><i class="fas fa-plane"></i> Documentary Edit</h2>
+            <!-- Video placeholder with play icon -->
+            <div class="video-placeholder">
+              <div class="play-icon">
+                <i class="fas fa-play"></i>
+              </div>
+            </div>
+            <button
+              class="btn btn-color-2"
+              onclick="location.href='https://youtu.be/QXCHfVK4YQo'"
+            >
+              <i class="fab fa-youtube"></i> View on YouTube
+            </button>
+          </div>
+          <div class="details-container color-container">
+            <h2><i class="fab fa-youtube"></i> Youtube Short</h2>
+            <div class="video-placeholder">
+              <div class="play-icon">
+                <i class="fas fa-play"></i>
+              </div>
+            </div>
+            <button
+              class="btn btn-color-2"
+              onclick="location.href='https://youtube.com/shorts/NfDG_NsmBtU?si=yCvKBUTsd2d3uGLc'"
+            >
+              <i class="fas fa-play"></i> View on Youtube
+            </button>
+          </div>
+          <div class="details-container color-container">
+            <h2><i class="fas fa-magic"></i> YouTube Short</h2>
+            <div class="video-placeholder">
+              <div class="play-icon">
+                <i class="fas fa-play"></i>
+              </div>
+            </div>
+            <button
+              class="btn btn-color-2"
+              onclick="location.href='https://youtube.com/shorts/n8bXdtjr524?si=3BmggbE7jZoAXCSV'"
+            >
+              <i class="fab fa-youtube"></i> view on Youtube
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="contact">
+      <p class="section__text__p1">Let's Connect</p>
+      <h1 class="title">Contact Me</h1>
+      <div class="contact-info-upper-container">
+        <div class="contact-info-container">
+          <i
+            class="fas fa-envelope"
+            style="font-size: 24px; color: var(--primary)"
+          ></i>
+          <p>
+            <a href="mailto:lawaniyadevraj0@gmail.com"
+              >lawaniyadevraj0@gmail.com</a
+            >
+          </p>
+        </div>
+        <div class="contact-info-container">
+          <i
+            class="fab fa-linkedin"
+            style="font-size: 24px; color: var(--primary)"
+          ></i>
+          <p>
+            <a
+              href="https://www.linkedin.com/in/devraj-lawaniya-689196256/?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app"
+              >LinkedIn</a
+            >
+          </p>
+        </div>
+        <div class="contact-info-container">
+          <i
+            class="fab fa-instagram"
+            style="font-size: 24px; color: var(--primary)"
+          ></i>
+          <p>
+            <a href="https://www.instagram.com/i.am.dev_?igsh=aW02dHowN2kzdjJ3"
+              >Instagram</a
+            >
+          </p>
+        </div>
+        <div class="contact-info-container">
+          <i
+            class="fab fa-youtube"
+            style="font-size: 24px; color: var(--primary)"
+          ></i>
+          <p><a href="https://www.youtube.com/@shubhspeaks667">YouTube</a></p>
+        </div>
+      </div>
+    </section>
+
+    <div class="scroll-indicator" id="scroll-top">
+      <i class="fas fa-arrow-up"></i>
+    </div>
+
+    <footer>
+      <nav>
+        <ul class="nav-links">
+          <li><a href="#about">About</a></li>
+          <li><a href="#skills">Skills</a></li>
+          <li><a href="#showvideos">Show videos</a></li>
+          <li><a href="#contact">Contact</a></li>
+        </ul>
+      </nav>
+      <p>Copyright © 2025 Devraj Lawaniya | All Rights Reserved</p>
+    </footer>
+
+    <script>
+      // Create video editing background elements
+      function createVideoEditingElements() {
+        const bgContainer = document.getElementById("video-editing-bg");
+
+        // Create timeline elements
+        for (let i = 0; i < 10; i++) {
+          const timeline = document.createElement("div");
+          timeline.className = "timeline-element";
+          timeline.style.top = `${Math.random() * 100}%`;
+          timeline.style.width = `${Math.random() * 200 + 100}px`;
+          timeline.style.animationDelay = `${Math.random() * 5}s`;
+          timeline.style.animationDuration = `${Math.random() * 10 + 10}s`;
+          bgContainer.appendChild(timeline);
+        }
+
+        // Create clip elements
+        for (let i = 0; i < 8; i++) {
+          const clip = document.createElement("div");
+          clip.className = "clip-element";
+          clip.style.left = `${Math.random() * 90}%`;
+          clip.style.animationDelay = `${Math.random() * 8}s`;
+          bgContainer.appendChild(clip);
+        }
+
+        // Create effect elements
+        for (let i = 0; i < 6; i++) {
+          const effect = document.createElement("div");
+          effect.className = "effect-element";
+          effect.style.left = `${Math.random() * 100}%`;
+          effect.style.top = `${Math.random() * 100}%`;
+          effect.style.animationDelay = `${Math.random() * 10}s`;
+          bgContainer.appendChild(effect);
+        }
+
+        // Create waveform elements
+        for (let i = 0; i < 5; i++) {
+          const waveform = document.createElement("div");
+          waveform.className = "waveform";
+          waveform.style.top = `${Math.random() * 100}%`;
+          waveform.style.width = `${Math.random() * 200 + 100}px`;
+          waveform.style.animationDelay = `${Math.random() * 7}s`;
+          bgContainer.appendChild(waveform);
+        }
+      }
+
+      // Run on page load
+      window.addEventListener("DOMContentLoaded", () => {
+        createVideoEditingElements();
+      });
+
+      // Scroll to top button
+      const scrollTopBtn = document.getElementById("scroll-top");
+
+      window.addEventListener("scroll", () => {
+        if (window.scrollY > 300) {
+          scrollTopBtn.classList.add("visible");
+        } else {
+          scrollTopBtn.classList.remove("visible");
+        }
+      });
+
+      scrollTopBtn.addEventListener("click", () => {
+        window.scrollTo({
+          top: 0,
+          behavior: "smooth",
+        });
+      });
+
+      // Header shadow on scroll
+      window.addEventListener("scroll", () => {
+        const navbar = document.getElementById("desktop-nav");
+        if (window.scrollY > 0) {
+          navbar.style.boxShadow = "0 5px 20px var(--shadow)";
+        } else {
+          navbar.style.boxShadow = "0 2px 10px var(--shadow)";
+        }
+      });
+
+      // Smooth scrolling for navigation links
+      document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
+        anchor.addEventListener("click", function (e) {
+          e.preventDefault();
+
+          const targetId = this.getAttribute("href");
+          const targetElement = document.querySelector(targetId);
+
+          if (targetElement) {
+            window.scrollTo({
+              top: targetElement.offsetTop - 80,
+              behavior: "smooth",
+            });
+          }
+        });
+      });
+    </script>
+  </body>
+</html>
